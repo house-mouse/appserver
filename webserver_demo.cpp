@@ -264,3 +264,43 @@ int H2O_Webserver::setup_ssl(const char *cert_file,
     return 0;
 }
 
+int webserver_demo(H2O_Webserver &server) {
+    h2o_access_log_filehandle_t *logfh = h2o_access_log_open_handle("/dev/stdout", NULL, H2O_LOGCONF_ESCAPE_APACHE);
+    h2o_pathconf_t *pathconf;
+    
+    
+    pathconf = server.register_handler("/post-test", post_test);
+    if (logfh != NULL)
+        h2o_access_log_register(pathconf, logfh);
+    
+    pathconf = server.register_handler("/chunked-test", chunked_test);
+    if (logfh != NULL)
+        h2o_access_log_register(pathconf, logfh);
+    
+    pathconf = server.register_handler("/reproxy-test", reproxy_test);
+    h2o_reproxy_register(pathconf);
+    if (logfh != NULL)
+        h2o_access_log_register(pathconf, logfh);
+    
+    pathconf = server.register_path("/");
+    h2o_file_register(pathconf, "examples/doc_root", NULL, NULL, 0);
+    if (logfh != NULL)
+        h2o_access_log_register(pathconf, logfh);
+    
+    if (USE_HTTPS &&
+        server.setup_ssl("certs/server-crt.pem",
+                         "certs/server-key.pem",
+                         "DEFAULT:!MD5:!DSS:!DES:!RC4:!RC2:!SEED:!IDEA:!NULL:!ADH:!EXP:!SRP:!PSK") != 0) {
+        return -5;
+    }
+    
+    server.accept_ctx.ctx   = &server.ctx;
+    server.accept_ctx.hosts = server.config.hosts;
+    
+    if (server.create_ip4_listener(7890) != 0) {
+        fprintf(stderr, "failed to listen to 127.0.0.1:7890:%s\n", strerror(errno));
+        return -4;
+    }
+
+    return 0;
+}

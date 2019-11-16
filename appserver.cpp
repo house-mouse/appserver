@@ -1,6 +1,7 @@
 #include "uv.h"
 
 #include "webserver.hpp"
+#include "webserver_demo.hpp"
 
 
 #include <curl/curl.h>

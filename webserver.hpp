@@ -55,6 +55,4 @@ public:
 
 };
 
-int webserver_demo(H2O_Webserver &server);
-
 #endif // __H2O_WEBSERVER_HPP__

@@ -1,0 +1,59 @@
+Every app should have a world class webserver built in
+
+That's the thesis.
+
+Web servers are the new UI.  You can see this all over, but unfortunately,
+most apps have really poor webservers.  Then they punt on security and make
+you use something like nginx or nodejs or something as a front end portal.
+
+Let's just have a library that tries to do this correctly all in one.
+
+That's what the project is for.
+
+Take all the "hard" stuff with doing encryption (ssl) and authentication
+(client certificates) and all the other jazz and put in in something that
+can hopefully easily be included in other projects.
+
+Use an advanced world class web server (h2o) capable of doing advanced
+http/2 and http/3 transactions and scaling to crazy huge numbers of sites
+and just make that available.
+
+Wade through all the difficulties and hardships of getting openssl to actually
+work and go once and make it available to all sorts of other projects.
+
+Provide a client through something like curl to be able to do the same awesomeness
+that h2o does on the server side on a client side so that we can do client or
+server stuff smartly.
+
+Encode the whole pks/cert nonsesense process in a smart way so that we can just
+use it and have it instead of fighting with it and doing dumb username/password
+things.
+
+Then provide some simple convenience tools (like logs and CLI's) in a convenient
+way so that projects can just do ... whatever they do..
+
+That's the idea.
+
+Can we get there?
+
+So far...
+
+h2o seesm great and solid.
+We're pulling in our own libuv, because .... it can be obnoxious to get a system
+library found for one thing and not another.  This should be configurable, but
+it's not yet.
+
+We're building our own openssl.  Same deal.  It can be a tricky pain.
+
+Curl is being pulled in and built.  It's a bit untested...
+
+zlib is being pulled in and that seems ok.
+
+libressl doesn't seem to work yet...
+
+wslay is being pulled in but is largely untested
+
+Pantheios is being pulled in for logging, but there's much more to do there yet...
+
+
+

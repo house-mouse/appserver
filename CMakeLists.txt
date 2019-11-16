@@ -6,7 +6,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake_mod
 
 SET(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Debug type")
 
-project(centrus)
+project(appserver)
 
 
 
@@ -25,8 +25,8 @@ set (LIB_OPENSSL_INCLUDE_DIRS ${OPENSSL_INCLUDE_DIRECTORIES})
 add_subdirectory(submodules/uv-ssl-client)
 
 
-add_executable(centrus
-    centrus.cpp
+add_library(libappserver
+    appserver.cpp
 
     filepath.cpp
     filepath.hpp
@@ -35,21 +35,28 @@ add_executable(centrus
     webserver.hpp
 )
 
-target_link_directories(centrus PUBLIC
+add_executable(appserver_demo
+    webserver_demo.cpp
+    webserver_demo.hpp
+)
+target_link_libraries(appserver_demo PUBLIC libappserver)
+
+target_link_directories(libappserver PUBLIC
 	${LIBUV_LINK_DIRECTORIES})
-target_link_libraries(centrus PUBLIC
-        libh2o uv_a ssl crypto ${ZLIB_LIBRARIES} z)
+target_link_libraries(libappserver PUBLIC
+        libh2o uv_a ssl crypto  z)
 
 message("zlib: " ${ZLIB_INCLUDE_DIRS})
 message("libuv: " ${LIBUV_INCLUDE_DIRECTORIES})
 message("h2o: " ${LIBH2O_INCLUDE_DIRECTORIES})
 message("wslay: " ${WSLAY_INCLUDE_DIRS})
 
-target_include_directories(centrus PUBLIC
+target_include_directories(libappserver PUBLIC
         ${LIBUV_INCLUDE_DIRECTORIES} ${OPENSSL_INCLUDE_DIRECTORIES} ${LIBH2O_INCLUDE_DIRECTORIES} ${LIBUV_INCLUDE_DIRS})
 
-add_custom_command(TARGET centrus PRE_BUILD
+# This just doesn't work yet:
+add_custom_command(TARGET appserver_demo POST_BUILD
                    COMMAND ${CMAKE_COMMAND} -E copy_directory
-                   ${CMAKE_CURRENT_BINARY_DIR}/_deps/h2o-external-src/examples $<TARGET_FILE_DIR:centrus>)
+                   ${CMAKE_CURRENT_BINARY_DIR}/_deps/h2o-external-src/examples $<TARGET_FILE_DIR:appserver_demo>)
 
 
