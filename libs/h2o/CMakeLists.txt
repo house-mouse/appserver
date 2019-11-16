@@ -9,6 +9,7 @@ FetchContent_Declare(h2o-external
                      GIT_SHALLOW TRUE
 #                     GIT_REPOSITORY "https://github.com/h2o/h2o.git"
 # 		     GIT_TAG 484f8345497663578a0e90ffb3586899beda25b3
+#		     GIT_TAG 7627a2dd9d4b7417672fdec3dc6e7f8d3de379de
                     GIT_REPOSITORY "https://github.com/house-mouse/h2o.git"
                      )
 

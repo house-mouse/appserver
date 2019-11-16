@@ -48,10 +48,8 @@ message("wslay: " ${WSLAY_INCLUDE_DIRS})
 target_include_directories(centrus PUBLIC
         ${LIBUV_INCLUDE_DIRECTORIES} ${OPENSSL_INCLUDE_DIRECTORIES} ${LIBH2O_INCLUDE_DIRECTORIES} ${LIBUV_INCLUDE_DIRS})
 
+add_custom_command(TARGET centrus PRE_BUILD
+                   COMMAND ${CMAKE_COMMAND} -E copy_directory
+                   ${CMAKE_CURRENT_BINARY_DIR}/_deps/h2o-external-src/examples $<TARGET_FILE_DIR:centrus>)
 
-add_custom_command(
-     OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/"
-     COMMAND cmake -E copy_directory
-     "${CMAKE_CURRENT_BINARY_DIR}/_deps/h2o-external-src/examples"
-   )
 
