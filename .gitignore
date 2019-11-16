@@ -1,2 +1,5 @@
 .*.swp
 .DS_Store
+certs/*.pem
+certs/*.pkcs12
+certs/*.srl
