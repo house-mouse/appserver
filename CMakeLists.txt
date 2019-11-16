@@ -6,7 +6,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake_mod
 
 SET(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Debug type")
 
-project(liqlink)
+project(centrus)
 
 
 
@@ -25,8 +25,8 @@ set (LIB_OPENSSL_INCLUDE_DIRS ${OPENSSL_INCLUDE_DIRECTORIES})
 add_subdirectory(submodules/uv-ssl-client)
 
 
-add_executable(liqlink
-    liqlink.cpp
+add_executable(centrus
+    centrus.cpp
 
     filepath.cpp
     filepath.hpp
@@ -35,9 +35,9 @@ add_executable(liqlink
     webserver.hpp
 )
 
-target_link_directories(liqlink PUBLIC
+target_link_directories(centrus PUBLIC
 	${LIBUV_LINK_DIRECTORIES})
-target_link_libraries(liqlink PUBLIC
+target_link_libraries(centrus PUBLIC
         libh2o uv_a ssl crypto ${ZLIB_LIBRARIES} z)
 
 message("zlib: " ${ZLIB_INCLUDE_DIRS})
@@ -45,7 +45,7 @@ message("libuv: " ${LIBUV_INCLUDE_DIRECTORIES})
 message("h2o: " ${LIBH2O_INCLUDE_DIRECTORIES})
 message("wslay: " ${WSLAY_INCLUDE_DIRS})
 
-target_include_directories(liqlink PUBLIC
+target_include_directories(centrus PUBLIC
         ${LIBUV_INCLUDE_DIRECTORIES} ${OPENSSL_INCLUDE_DIRECTORIES} ${LIBH2O_INCLUDE_DIRECTORIES} ${LIBUV_INCLUDE_DIRS})
 
 
