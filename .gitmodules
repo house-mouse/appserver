@@ -1,0 +1,3 @@
+[submodule "submodules/uv-ssl-client"]
+	path = submodules/uv-ssl-client
+	url = https://github.com/house-mouse/uv-ssl-client.git

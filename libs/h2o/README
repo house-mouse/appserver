@@ -1,0 +1,5 @@
+This is a big ugly hack to package/compartmentalize h2o in a way
+that allows us to use the libraries we want (the ones we build
+ourselves) rather than using the system available (or not)
+libraries.  It fully sucks.
+
