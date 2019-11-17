@@ -10,7 +10,7 @@ cmake_policy(SET CMP0042 NEW)
 FetchContent_Declare(curl-external
                      GIT_SHALLOW TRUE
                      GIT_REPOSITORY "https://github.com/curl/curl.git"
-                     GIT_TAG 7627a2dd9d4b7417672fdec3dc6e7f8d3de379de
+#                     GIT_TAG 7627a2dd9d4b7417672fdec3dc6e7f8d3de379de
                      )
 
 FetchContent_Populate(curl-external)
