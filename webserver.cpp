@@ -133,6 +133,7 @@ h2o_pathconf_t *H2O_Webserver::register_handler(const char *path,
 struct st_h2o_static_file_handler_t {
     h2o_handler_t super;
     const char *content_type;
+    size_t content_type_size;
     const char *body;
     size_t body_size;
 };
@@ -148,7 +149,7 @@ static int static_file_handler(h2o_handler_t *self,
 
     req->res.status = 200;
     req->res.reason = "OK";
-    h2o_add_header(&req->pool, &req->res.headers, H2O_TOKEN_CONTENT_TYPE, NULL, H2O_STRLIT("text/plain"));
+    h2o_add_header(&req->pool, &req->res.headers, H2O_TOKEN_CONTENT_TYPE, NULL, handler->content_type, handler->content_type_size);
     h2o_send_inline(req, handler->body, handler->body_size);
     
     return 0;
@@ -165,10 +166,13 @@ h2o_pathconf_t *H2O_Webserver::register_static_file_handler(const char *path,
     
     h2o_pathconf_t *pathconf = register_path(path);
     h2o_static_file_handler_t *handler = (h2o_static_file_handler_t *)h2o_create_handler(pathconf, sizeof(*handler));
-    handler->super.on_req = static_file_handler;
-    handler->content_type = content_type;
-    handler->body = data;
-    handler->body_size = len;
+    handler->super.on_req      = static_file_handler;
+    
+    handler->content_type      = content_type;
+    handler->content_type_size = strlen(content_type);
+
+    handler->body              = data;
+    handler->body_size         = len;
     
     return pathconf;
 }
