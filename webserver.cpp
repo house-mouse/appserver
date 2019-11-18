@@ -129,6 +129,50 @@ h2o_pathconf_t *H2O_Webserver::register_handler(const char *path,
     return pathconf;
 }
 
+
+struct st_h2o_static_file_handler_t {
+    h2o_handler_t super;
+    const char *content_type;
+    const char *body;
+    size_t body_size;
+};
+typedef struct st_h2o_static_file_handler_t h2o_static_file_handler_t;
+
+
+static int static_file_handler(h2o_handler_t *self,
+                        h2o_req_t *req) {
+    if (!h2o_memis(req->method.base, req->method.len, H2O_STRLIT("GET")))
+        return -1;
+    
+    h2o_static_file_handler_t *handler = (h2o_static_file_handler_t *)self;
+
+    req->res.status = 200;
+    req->res.reason = "OK";
+    h2o_add_header(&req->pool, &req->res.headers, H2O_TOKEN_CONTENT_TYPE, NULL, H2O_STRLIT("text/plain"));
+    h2o_send_inline(req, handler->body, handler->body_size);
+    
+    return 0;
+}
+
+
+// Serve a static string as a file with the given mime type
+// mime_type and data must live "forever" (be static)
+
+h2o_pathconf_t *H2O_Webserver::register_static_file_handler(const char *path,
+                                                            const char *content_type,
+                                                            const char *data,
+                                                            size_t len) {
+    
+    h2o_pathconf_t *pathconf = register_path(path);
+    h2o_static_file_handler_t *handler = (h2o_static_file_handler_t *)h2o_create_handler(pathconf, sizeof(*handler));
+    handler->super.on_req = static_file_handler;
+    handler->content_type = content_type;
+    handler->body = data;
+    handler->body_size = len;
+    
+    return pathconf;
+}
+
 static int chunked_test(h2o_handler_t *self,
                         h2o_req_t *req) {
 

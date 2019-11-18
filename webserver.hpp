@@ -39,7 +39,10 @@ public:
                                   int flags=0);
     h2o_pathconf_t *register_handler(const char *path,
                                      int (*on_req)(h2o_handler_t *, h2o_req_t *));
-    
+    h2o_pathconf_t *register_static_file_handler(const char *path,
+                                                 const char *mime_type,
+                                                 const char *data,
+                                                 size_t len);
     void on_accept(uv_stream_t *listener, int status);
 
     int create_listener(struct sockaddr_in &addr);
