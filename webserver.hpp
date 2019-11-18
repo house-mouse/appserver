@@ -9,10 +9,23 @@
 
 class H2O_Webserver;
 
+// Static File handler
+
+struct st_h2o_static_file_handler_t {
+    h2o_handler_t super;
+    const char *content_type;
+    size_t content_type_size;
+    const char *body;
+    size_t body_size;
+};
+typedef struct st_h2o_static_file_handler_t h2o_static_file_handler_t;
+
 struct ListenerRecord {
     H2O_Webserver *webserver;
     uv_tcp_t listener;
 };
+
+// Webserver instance
 
 class H2O_Webserver {
 private:
@@ -43,6 +56,8 @@ public:
                                                  const char *mime_type,
                                                  const char *data,
                                                  size_t len);
+    h2o_pathconf_t *register_websocket(const char *path);
+    
     void on_accept(uv_stream_t *listener, int status);
 
     int create_listener(struct sockaddr_in &addr);

@@ -23,6 +23,6 @@ SET(WSLAY_LIBRARY_DIRS
         ${wslay-external_BINARY_DIR}
         PARENT_SCOPE)
 
-
-SET(WSLAY_INCLUDE_DIRS ${wslay-external_SOURCE_DIR}/include PARENT_SCOPE)
+# Figure out how to get source/binary resolved here..
+SET(WSLAY_INCLUDE_DIRS ${wslay-external_BINARY_DIR}/lib/includes ${wslay-external_SOURCE_DIR}/lib/includes PARENT_SCOPE)
 

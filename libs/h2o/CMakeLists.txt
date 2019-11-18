@@ -21,10 +21,11 @@ include(h2o.cmake)
 #.//build/_deps/wslay-external-build/wslay-config.cmake
 
 
-
 message("ADDING: " ${h2o-external_SOURCE_DIR}/include)
 target_include_directories(libh2o PUBLIC ${h2o-external_SOURCE_DIR}/include)
 target_include_directories(libh2o PUBLIC ${openssl-external_SOURCE_DIR}/include)
+message("ADDING: wslay includes - " ${WSLAY_INCLUDE_DIRS})
+target_include_directories(libh2o PUBLIC ${WSLAY_INCLUDE_DIRS})
 
 set(LIBH2O_INCLUDE_DIRECTORIES ${h2o-external_SOURCE_DIR}/include PARENT_SCOPE)
 set(ZLIB_LIBRARIES ${ZLIB_LIBARIES} PARENT_SCOPE)

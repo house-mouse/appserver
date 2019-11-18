@@ -20,6 +20,8 @@ add_subdirectory(libs/wslay)
 add_subdirectory(libs/h2o)
 add_subdirectory(libs/curl)
 
+FetchContent_MakeAvailable(openssl-external wslay-external h2o-external)
+
 set (LIB_UV_INCLUDE_DIRS ${LIBUV_INCLUDE_DIRECTORIES})
 set (LIB_OPENSSL_INCLUDE_DIRS ${OPENSSL_INCLUDE_DIRECTORIES})
 add_subdirectory(submodules/uv-ssl-client)
@@ -33,13 +35,15 @@ add_library(libappserver
     logger.hpp
     webserver.cpp
     webserver.hpp
+    appserver_websocket.c
+    appserver_websocket.h
 )
 
 add_executable(appserver_demo
     webserver_demo.cpp
     webserver_demo.hpp
 )
-target_link_libraries(appserver_demo PUBLIC libappserver)
+target_link_libraries(appserver_demo PUBLIC libappserver wslay)
 
 target_link_directories(libappserver PUBLIC ${LIBUV_LINK_DIRECTORIES})
 target_link_libraries(libappserver PUBLIC libh2o uv_a ssl crypto  z)

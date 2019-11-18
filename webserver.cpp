@@ -12,6 +12,10 @@
 #include "h2o.h"
 #include "h2o/http1.h"
 #include "h2o/http2.h"
+#include "h2o/websocket.h"
+extern "C" {
+#include "appserver_websocket.h"
+}
 
 #include "openssl/ssl.h"
 
@@ -130,15 +134,9 @@ h2o_pathconf_t *H2O_Webserver::register_handler(const char *path,
 }
 
 
-struct st_h2o_static_file_handler_t {
-    h2o_handler_t super;
-    const char *content_type;
-    size_t content_type_size;
-    const char *body;
-    size_t body_size;
-};
-typedef struct st_h2o_static_file_handler_t h2o_static_file_handler_t;
-
+// Static File Handler
+//
+// Probably could use some C++ magic...
 
 static int static_file_handler(h2o_handler_t *self,
                         h2o_req_t *req) {
@@ -177,57 +175,25 @@ h2o_pathconf_t *H2O_Webserver::register_static_file_handler(const char *path,
     return pathconf;
 }
 
-static int chunked_test(h2o_handler_t *self,
-                        h2o_req_t *req) {
 
-//    h2o_conn_t *conn = req->conn;
-    
-    static h2o_generator_t generator = {NULL, NULL};
-    
-    if (!h2o_memis(req->method.base, req->method.len, H2O_STRLIT("GET")))
+
+int on_websocket_req(h2o_handler_t *self, h2o_req_t *req)
+{
+    const char *client_key;
+
+    if (h2o_is_websocket_handshake(req, &client_key) != 0 || client_key == NULL) {
         return -1;
-    
-    h2o_iovec_t body = h2o_strdup(&req->pool, "Hello.  There is a mouse in the house.\n", SIZE_MAX);
-    req->res.status = 200;
-    req->res.reason = "OK";
-    h2o_add_header(&req->pool, &req->res.headers, H2O_TOKEN_CONTENT_TYPE, NULL, H2O_STRLIT("text/plain"));
-    h2o_start_response(req, &generator);
-    h2o_send(req, &body, 1, H2O_SEND_STATE_FINAL);
-    
+    }
+    h2o_upgrade_to_websocket(req, client_key, NULL, on_ws_message);
     return 0;
 }
 
-static int reproxy_test(h2o_handler_t *self, h2o_req_t *req) {
-    if (!h2o_memis(req->method.base, req->method.len, H2O_STRLIT("GET"))) {
-        return -1;
-    }
+h2o_pathconf_t *H2O_Webserver::register_websocket(const char *path) {
     
-    req->res.status = 200;
-    req->res.reason = "OK";
-    h2o_add_header(&req->pool,
-                   &req->res.headers,
-                   H2O_TOKEN_X_REPROXY_URL,
-                   NULL, H2O_STRLIT("http://www.ietf.org/"));
-    h2o_send_inline(req, H2O_STRLIT("you should never see this!\n"));
-    
-    return 0;
-}
+    h2o_pathconf_t *pathconf = register_path(path, 0);
+    h2o_create_handler(pathconf, sizeof(h2o_handler_t))->on_req = on_websocket_req;
 
-static int post_test(h2o_handler_t *self, h2o_req_t *req) {
-    if (h2o_memis(req->method.base, req->method.len, H2O_STRLIT("POST")) &&
-        h2o_memis(req->path_normalized.base,
-                  req->path_normalized.len,
-                  H2O_STRLIT("/post-test/"))) {
-        static h2o_generator_t generator = {NULL, NULL};
-        req->res.status = 200;
-        req->res.reason = "OK";
-        h2o_add_header(&req->pool, &req->res.headers, H2O_TOKEN_CONTENT_TYPE, NULL, H2O_STRLIT("text/plain; charset=utf-8"));
-        h2o_start_response(req, &generator);
-        h2o_send(req, &req->entity, 1, H2O_SEND_STATE_FINAL);
-        return 0;
-    }
-    
-    return -1;
+    return pathconf;
 }
 
 int H2O_Webserver::create_listener(struct sockaddr_in &addr) {
