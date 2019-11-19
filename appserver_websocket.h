@@ -6,13 +6,13 @@
 
 void on_ws_message(h2o_websocket_conn_t *conn, const struct wslay_event_on_msg_recv_arg *arg);
 
-static int on_req(h2o_handler_t *self, h2o_req_t *req);
+int on_websocket_req(h2o_handler_t *self, h2o_req_t *req);
 
-static void on_complete(void *user_data, h2o_socket_t *sock, size_t reqsize);
+void on_websocket_complete(void *user_data, h2o_socket_t *sock, size_t reqsize);
 
 ssize_t recv_callback(wslay_event_context_ptr ctx, uint8_t *buf, size_t len, int flags, void *_conn);
 
-static ssize_t send_callback(wslay_event_context_ptr ctx, const uint8_t *data, size_t len, int flags, void *_conn);
+ssize_t send_callback(wslay_event_context_ptr ctx, const uint8_t *data, size_t len, int flags, void *_conn);
 
 static void on_msg_callback(wslay_event_context_ptr ctx, const struct wslay_event_on_msg_recv_arg *arg, void *_conn);
 

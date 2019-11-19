@@ -154,8 +154,8 @@ static int static_file_handler(h2o_handler_t *self,
 }
 
 
-// Serve a static string as a file with the given mime type
-// mime_type and data must live "forever" (be static)
+// Serve a static string as a file with the given content type
+// content_type and data must live "forever" (be static)
 
 h2o_pathconf_t *H2O_Webserver::register_static_file_handler(const char *path,
                                                             const char *content_type,
@@ -176,17 +176,6 @@ h2o_pathconf_t *H2O_Webserver::register_static_file_handler(const char *path,
 }
 
 
-
-int on_websocket_req(h2o_handler_t *self, h2o_req_t *req)
-{
-    const char *client_key;
-
-    if (h2o_is_websocket_handshake(req, &client_key) != 0 || client_key == NULL) {
-        return -1;
-    }
-    h2o_upgrade_to_websocket(req, client_key, NULL, on_ws_message);
-    return 0;
-}
 
 h2o_pathconf_t *H2O_Webserver::register_websocket(const char *path) {
     
