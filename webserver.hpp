@@ -6,6 +6,7 @@
 #include "h2o/memcached.h"
 
 #include <stdint.h>
+#include "appserver_websocket.hpp"
 
 class H2O_Webserver;
 
@@ -25,6 +26,13 @@ struct ListenerRecord {
     uv_tcp_t listener;
 };
 
+struct WebSocketRegistrationRecord {
+    WebSocketCreationRecord creation_record;
+    WebSocketGenerator      generator;
+    h2o_pathconf_t          *path_conf;
+};
+
+
 // Webserver instance
 
 class H2O_Webserver {
@@ -41,6 +49,7 @@ private:
     
     static h2o_multithread_receiver_t libmemcached_receiver;
 
+    std::vector<std::shared_ptr<WebSocketRegistrationRecord> > websocket_registrations;
 public:
     h2o_globalconf_t config;
     h2o_hostconf_t *hostconf;
@@ -57,7 +66,10 @@ public:
                                                  const char *data,
                                                  size_t len);
     h2o_pathconf_t *register_websocket(const char *path);
-    
+    h2o_pathconf_t *register_websocket(const std::string path,
+                                       WebSocketGenerator generator,
+                                       void *data);
+
     void on_accept(uv_stream_t *listener, int status);
 
     int create_listener(struct sockaddr_in &addr);

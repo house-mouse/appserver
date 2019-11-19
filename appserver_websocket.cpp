@@ -28,6 +28,8 @@
 #include "h2o.h"
 #include "h2o/websocket.h"
 
+#include "appserver_websocket.hpp"
+#include "webserver.hpp"
 
 void on_websocket_message(h2o_websocket_conn_t *conn,
                           const struct wslay_event_on_msg_recv_arg *arg) {
@@ -36,10 +38,14 @@ void on_websocket_message(h2o_websocket_conn_t *conn,
         return;
     }
 
+    AppServerWebSocket *ws((AppServerWebSocket *)conn->data);
+    ws->receive_websocket_message(arg);
+    /*
     if (!wslay_is_ctrl_frame(arg->opcode)) {
         struct wslay_event_msg msgarg = {arg->opcode, arg->msg, arg->msg_length};
         wslay_event_queue_msg(conn->ws_ctx, &msgarg);
     }
+    */
 }
 
 int on_websocket_req(h2o_handler_t *self, h2o_req_t *req) {
@@ -48,13 +54,13 @@ int on_websocket_req(h2o_handler_t *self, h2o_req_t *req) {
     if (h2o_is_websocket_handshake(req, &client_key) != 0 || client_key == NULL) {
         return -1;
     }
-    h2o_upgrade_to_websocket(req, client_key, NULL, on_websocket_message);
+    h2o_upgrade_to_websocket(req, client_key, on_websocket_message);
     return 0;
 }
 
 
 ssize_t recv_callback(wslay_event_context_ptr ctx, uint8_t *buf, size_t len, int flags, void *_conn) {
-    h2o_websocket_conn_t *conn = _conn;
+    h2o_websocket_conn_t *conn = (h2o_websocket_conn_t *)_conn;
 
     /* return WOULDBLOCK if no data */
     if (conn->sock->input->size == 0) {
@@ -70,8 +76,8 @@ ssize_t recv_callback(wslay_event_context_ptr ctx, uint8_t *buf, size_t len, int
 }
 
 
-static ssize_t send_callback(wslay_event_context_ptr ctx, const uint8_t *data, size_t len, int flags, void *_conn) {
-    h2o_websocket_conn_t *conn = _conn;
+ssize_t send_callback(wslay_event_context_ptr ctx, const uint8_t *data, size_t len, int flags, void *_conn) {
+    h2o_websocket_conn_t *conn = (h2o_websocket_conn_t *) _conn;
     h2o_iovec_t *buf;
 
     /* return WOULDBLOCK if pending or no buffer available */
@@ -84,7 +90,7 @@ static ssize_t send_callback(wslay_event_context_ptr ctx, const uint8_t *data, s
     buf = &conn->_write_buf.bufs[conn->_write_buf.cnt];
 
     /* copy data */
-    buf->base = h2o_mem_alloc(len);
+    buf->base = (char *)h2o_mem_alloc(len);
     buf->len = len;
     memcpy(buf->base, data, len);
     ++conn->_write_buf.cnt;
@@ -94,12 +100,12 @@ static ssize_t send_callback(wslay_event_context_ptr ctx, const uint8_t *data, s
 static void on_msg_callback(wslay_event_context_ptr ctx,
                             const struct wslay_event_on_msg_recv_arg *arg,
                             void *_conn) {
-    h2o_websocket_conn_t *conn = _conn;
+    h2o_websocket_conn_t *conn = (h2o_websocket_conn_t *)_conn;
     (*conn->cb)(conn, arg);
 }
 
 void on_websocket_complete(void *user_data, h2o_socket_t *sock, size_t reqsize) {
-    h2o_websocket_conn_t *conn = user_data;
+    h2o_websocket_conn_t *conn = (h2o_websocket_conn_t *) user_data;
 
     /* close the connection on error */
     if (sock == NULL) {
@@ -135,7 +141,7 @@ static void on_close(h2o_websocket_conn_t *conn) {
 }
 
 static void on_write_complete(h2o_socket_t *sock, const char *err) {
-    h2o_websocket_conn_t *conn = sock->data;
+    h2o_websocket_conn_t *conn = (h2o_websocket_conn_t *)sock->data;
 
     if (err != NULL) {
         on_close(conn);
@@ -150,7 +156,7 @@ static void on_write_complete(h2o_socket_t *sock, const char *err) {
 
 
 static void on_recv(h2o_socket_t *sock, const char *err) {
-    h2o_websocket_conn_t *conn = sock->data;
+    h2o_websocket_conn_t *conn = (h2o_websocket_conn_t *) sock->data;
 
     if (err != NULL) {
         on_close(conn);
@@ -161,9 +167,14 @@ static void on_recv(h2o_socket_t *sock, const char *err) {
 
 h2o_websocket_conn_t *h2o_upgrade_to_websocket(h2o_req_t *req,
                                                const char *client_key,
-                                               void *data,
                                                h2o_websocket_msg_callback cb) {
-    h2o_websocket_conn_t *conn = h2o_mem_alloc(sizeof(*conn));
+   
+    h2o_websocket_handler *handler = (h2o_websocket_handler *)(req->handler);
+    WebSocketRegistrationRecord *registration = handler->registration_record;
+   
+    
+    
+    h2o_websocket_conn_t *conn = (h2o_websocket_conn_t *)h2o_mem_alloc(sizeof(*conn));
     char accept_key[29];
 
     /* only for http1 connection */
@@ -175,8 +186,10 @@ h2o_websocket_conn_t *h2o_upgrade_to_websocket(h2o_req_t *req,
     conn->ws_callbacks.recv_callback = recv_callback;
     conn->ws_callbacks.send_callback = send_callback;
     conn->ws_callbacks.on_msg_recv_callback = on_msg_callback;
-    conn->data = data;
     conn->cb = cb;
+    
+    AppServerWebSocket *ws( registration->generator(registration->creation_record, conn));
+    conn->data = ws;
 
     wslay_event_context_server_init(&conn->ws_ctx, &conn->ws_callbacks, conn);
 
@@ -190,7 +203,8 @@ h2o_websocket_conn_t *h2o_upgrade_to_websocket(h2o_req_t *req,
 
     /* send */
     h2o_http1_upgrade(req, NULL, 0, on_websocket_complete, conn);
-
+    
+    
     return conn;
 }
 
@@ -274,4 +288,44 @@ void h2o_websocket_proceed(h2o_websocket_conn_t *conn) {
 
 Close:
     on_close(conn);
+}
+
+AppServerWebSocket::AppServerWebSocket(h2o_websocket_conn_t *_conn):conn(_conn) {
+    
+}
+
+
+AppServerWebSocket::~AppServerWebSocket() {
+    
+}
+
+void AppServerWebSocket::receive_websocket_message(const struct wslay_event_on_msg_recv_arg *arg) {
+    
+}
+    
+void AppServerWebSocket::send_websocket_message(uint8_t opcode,                         const uint8_t *msg, size_t msg_length) {
+
+    struct wslay_event_msg msgarg = {opcode, (const uint8_t *)msg, msg_length};
+    wslay_event_queue_msg(conn->ws_ctx, &msgarg);
+}
+
+void AppServerWebSocket::close_websocket() {
+    h2o_websocket_close(conn);
+}
+
+
+
+AppServerEchoWebSocket::AppServerEchoWebSocket(h2o_websocket_conn_t *conn):AppServerWebSocket(conn) {}
+
+AppServerEchoWebSocket::~AppServerEchoWebSocket() {}
+
+void AppServerEchoWebSocket::receive_websocket_message(const struct wslay_event_on_msg_recv_arg *arg) {
+    send_websocket_message(arg->opcode,
+                           arg->msg,
+                           arg->msg_length);
+};
+
+
+AppServerWebSocket *EchoWebSocketGenerator(const WebSocketCreationRecord &creation_record, h2o_websocket_conn_t *conn) {
+    return new AppServerEchoWebSocket(conn);
 }

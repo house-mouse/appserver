@@ -13,9 +13,7 @@
 #include "h2o/http1.h"
 #include "h2o/http2.h"
 #include "h2o/websocket.h"
-extern "C" {
-#include "appserver_websocket.h"
-}
+#include "appserver_websocket.hpp"
 
 #include "openssl/ssl.h"
 
@@ -184,6 +182,26 @@ h2o_pathconf_t *H2O_Webserver::register_websocket(const char *path) {
 
     return pathconf;
 }
+
+
+h2o_pathconf_t *H2O_Webserver::register_websocket(const std::string path, WebSocketGenerator generator, void *data) {
+    
+    std::shared_ptr<WebSocketRegistrationRecord> registration(new WebSocketRegistrationRecord);
+    
+    registration->generator = generator;
+    registration->path_conf = register_path(path.c_str(), 0);
+    registration->creation_record.data = data;
+    registration->creation_record.path = path;
+    websocket_registrations.push_back(registration);
+    
+    h2o_websocket_handler *handler = (h2o_websocket_handler *)h2o_create_handler(registration->path_conf,
+                                                       sizeof(h2o_websocket_handler));
+    handler->super.on_req        = on_websocket_req;
+    handler->registration_record = registration.get(); // sorta unfortunate...
+
+    return registration->path_conf;
+}
+
 
 int H2O_Webserver::create_listener(struct sockaddr_in &addr) {
     ListenerRecord *listener = new_listener_record();

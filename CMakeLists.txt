@@ -35,8 +35,8 @@ add_library(libappserver
     logger.hpp
     webserver.cpp
     webserver.hpp
-    appserver_websocket.c
-    appserver_websocket.h
+    appserver_websocket.cpp
+    appserver_websocket.hpp
 )
 
 add_executable(appserver_demo

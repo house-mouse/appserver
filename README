@@ -38,7 +38,7 @@ Can we get there?
 
 So far...
 
-h2o seesm great and solid.
+h2o seems great and solid.
 We're pulling in our own libuv, because .... it can be obnoxious to get a system
 library found for one thing and not another.  This should be configurable, but
 it's not yet.
@@ -54,6 +54,7 @@ libressl doesn't seem to work yet...
 wslay is being pulled in but is largely untested
 
 Pantheios is being pulled in for logging, but there's much more to do there yet...
+
 
 
 
