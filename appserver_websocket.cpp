@@ -51,6 +51,7 @@ void on_websocket_message(h2o_websocket_conn_t *conn,
 int on_websocket_req(h2o_handler_t *self, h2o_req_t *req) {
     const char *client_key;
 
+    fprintf(stderr, "websock_req called...\n");
     if (h2o_is_websocket_handshake(req, &client_key) != 0 || client_key == NULL) {
         return -1;
     }
@@ -307,6 +308,7 @@ void AppServerWebSocket::send_websocket_message(uint8_t opcode,                 
 
     struct wslay_event_msg msgarg = {opcode, (const uint8_t *)msg, msg_length};
     wslay_event_queue_msg(conn->ws_ctx, &msgarg);
+    h2o_websocket_proceed(conn); // hmm... yuck?
 }
 
 void AppServerWebSocket::close_websocket() {
@@ -320,6 +322,7 @@ AppServerEchoWebSocket::AppServerEchoWebSocket(h2o_websocket_conn_t *conn):AppSe
 AppServerEchoWebSocket::~AppServerEchoWebSocket() {}
 
 void AppServerEchoWebSocket::receive_websocket_message(const struct wslay_event_on_msg_recv_arg *arg) {
+    fprintf(stderr, "Opcode: %d msg:%s length: %ld\n", arg->opcode, arg->msg, arg->msg_length);
     send_websocket_message(arg->opcode,
                            arg->msg,
                            arg->msg_length);

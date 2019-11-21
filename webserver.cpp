@@ -176,7 +176,7 @@ h2o_pathconf_t *H2O_Webserver::register_static_file_handler(const char *path,
 
 
 h2o_pathconf_t *H2O_Webserver::register_websocket(const char *path) {
-    
+    assert(0); // let's not use this...
     h2o_pathconf_t *pathconf = register_path(path, 0);
     h2o_create_handler(pathconf, sizeof(h2o_handler_t))->on_req = on_websocket_req;
 
@@ -185,7 +185,7 @@ h2o_pathconf_t *H2O_Webserver::register_websocket(const char *path) {
 
 
 h2o_pathconf_t *H2O_Webserver::register_websocket(const std::string path, WebSocketGenerator generator, void *data) {
-    
+    fprintf(stderr, "Registered websock path: %s\n", path.c_str());
     std::shared_ptr<WebSocketRegistrationRecord> registration(new WebSocketRegistrationRecord);
     
     registration->generator = generator;
