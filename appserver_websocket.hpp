@@ -50,8 +50,9 @@ struct h2o_websocket_handler {
 typedef AppServerWebSocket *(*WebSocketGenerator)(const WebSocketCreationRecord &, h2o_websocket_conn_t *conn);
 
 class AppServerWebSocket {
-    h2o_websocket_conn_t *conn;
 public:
+    h2o_websocket_conn_t *conn;
+
     AppServerWebSocket(h2o_websocket_conn_t *conn);
     virtual ~AppServerWebSocket();
     

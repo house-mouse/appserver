@@ -33,12 +33,14 @@
 
 void on_websocket_message(h2o_websocket_conn_t *conn,
                           const struct wslay_event_on_msg_recv_arg *arg) {
+    AppServerWebSocket *ws((AppServerWebSocket *)conn->data);
+
     if (arg == NULL) {
         h2o_websocket_close(conn);
+        delete(ws); // This should unlink and cleanup...
         return;
     }
 
-    AppServerWebSocket *ws((AppServerWebSocket *)conn->data);
     ws->receive_websocket_message(arg);
     /*
     if (!wslay_is_ctrl_frame(arg->opcode)) {
@@ -138,6 +140,7 @@ static void free_write_buf(h2o_websocket_conn_t *conn) {
 }
 
 static void on_close(h2o_websocket_conn_t *conn) {
+    fprintf(stderr, "Websocket on_close called\n");
     (*conn->cb)(conn, NULL);
 }
 
@@ -243,6 +246,7 @@ int h2o_is_websocket_handshake(h2o_req_t *req, const char **ws_client_key) {
 void h2o_websocket_close(h2o_websocket_conn_t *conn) {
     if (conn->sock != NULL)
         h2o_socket_close(conn->sock);
+    
     free_write_buf(conn);
     wslay_event_context_free(conn->ws_ctx);
     free(conn);
@@ -306,6 +310,10 @@ void AppServerWebSocket::receive_websocket_message(const struct wslay_event_on_m
     
 void AppServerWebSocket::send_websocket_message(uint8_t opcode,                         const uint8_t *msg, size_t msg_length) {
 
+    if (!conn->ws_ctx) {
+        // We aren't initalize yet...
+        return;
+    }
     struct wslay_event_msg msgarg = {opcode, (const uint8_t *)msg, msg_length};
     wslay_event_queue_msg(conn->ws_ctx, &msgarg);
     h2o_websocket_proceed(conn); // hmm... yuck?
