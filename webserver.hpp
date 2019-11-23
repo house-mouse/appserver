@@ -63,7 +63,7 @@ public:
                                      int (*on_req)(h2o_handler_t *, h2o_req_t *));
     h2o_pathconf_t *register_static_file_handler(const char *path,
                                                  const char *mime_type,
-                                                 const char *data,
+                                                 const unsigned char *data,
                                                  size_t len);
     h2o_pathconf_t *register_websocket(const char *path);
     h2o_pathconf_t *register_websocket(const std::string path,

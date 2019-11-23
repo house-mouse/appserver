@@ -157,7 +157,7 @@ static int static_file_handler(h2o_handler_t *self,
 
 h2o_pathconf_t *H2O_Webserver::register_static_file_handler(const char *path,
                                                             const char *content_type,
-                                                            const char *data,
+                                                            const unsigned char *data,
                                                             size_t len) {
     
     h2o_pathconf_t *pathconf = register_path(path);
@@ -167,7 +167,7 @@ h2o_pathconf_t *H2O_Webserver::register_static_file_handler(const char *path,
     handler->content_type      = content_type;
     handler->content_type_size = strlen(content_type);
 
-    handler->body              = data;
+    handler->body              = (const char *)data;
     handler->body_size         = len;
     
     return pathconf;

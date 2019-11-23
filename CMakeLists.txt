@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 3.11)
 
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules
 		${CMAKE_CURRENT_BINARY_DIR}/_deps/wslay-external-build/)
 #.//build/_deps/wslay-external-build/wslay-config.cmake
@@ -33,10 +37,16 @@ add_library(libappserver
     filepath.cpp
     filepath.hpp
     logger.hpp
+    logger.cpp
+    cputime.hpp
+    cputime.cpp
     webserver.cpp
     webserver.hpp
     appserver_websocket.cpp
     appserver_websocket.hpp
+
+    libs/readerwriterqueue/atomicops.h
+    libs/readerwriterqueue/readerwriterqueue.h
 )
 
 add_executable(appserver_demo
@@ -45,7 +55,11 @@ add_executable(appserver_demo
 )
 target_link_libraries(appserver_demo PUBLIC libappserver wslay)
 
-target_link_directories(libappserver PUBLIC ${LIBUV_LINK_DIRECTORIES})
+target_link_directories(libappserver 
+  PUBLIC 
+    ${LIBUV_LINK_DIRECTORIES} 
+)
+
 target_link_libraries(libappserver PUBLIC libh2o uv_a ssl crypto  z)
 target_include_directories(libappserver PUBLIC
         ${LIBUV_INCLUDE_DIRECTORIES} 
@@ -53,6 +67,7 @@ target_include_directories(libappserver PUBLIC
 	${LIBH2O_INCLUDE_DIRECTORIES} 
 	${LIBUV_INCLUDE_DIRS}
 	${CMAKE_CURRENT_SOURCE_DIR}
+        ${CMAKE_CURRENT_SOURCE_DIR}/libs/readerwriterqueue
 )
 
 message("zlib: " ${ZLIB_INCLUDE_DIRS})

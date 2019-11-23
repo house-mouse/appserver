@@ -1,0 +1,12 @@
+
+Logging
+
+https://stackoverflow.com/questions/11694591/html5-websockets-javascript-based-real-time-logfile-viewer
+
+Wants...
+Log "objects" instead of just text.  It's way heavier, but way more useful.
+Back logs optionally to a file
+Websocket or other 'protocol' for paging out and getting older logs
+multi-thread friendly
+	Lockless structures where possible
+
