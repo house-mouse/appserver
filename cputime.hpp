@@ -19,5 +19,7 @@ public:
     float elapsed();
 };
 
+bool operator<(const struct timespec &a, const struct timespec &b);
+
 
 #endif //__CPUTIME_HPP__

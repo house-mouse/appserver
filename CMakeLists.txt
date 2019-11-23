@@ -44,6 +44,10 @@ add_library(libappserver
     webserver.hpp
     appserver_websocket.cpp
     appserver_websocket.hpp
+    uvmutex.hpp
+    uvmutex.cpp
+    uvlogconsumer.hpp
+    uvlogconsumer.cpp
 
     libs/readerwriterqueue/atomicops.h
     libs/readerwriterqueue/readerwriterqueue.h
