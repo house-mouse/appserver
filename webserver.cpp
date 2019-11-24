@@ -241,7 +241,7 @@ int H2O_Webserver::create_ip4_listener(const char *ip,
 }
 
 int H2O_Webserver::create_ip4_listener(uint16_t port) {
-    return create_ip4_listener("127.0.0.1", port);
+    return create_ip4_listener("0.0.0.0", port);
 }
 
 

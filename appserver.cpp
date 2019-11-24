@@ -3,9 +3,6 @@
 #include "webserver.hpp"
 #include "webserver_demo.hpp"
 
-
-#include <curl/curl.h>
-
 int main(int argc, char *argv[]) {
     // Turn off sigpipe
     signal(SIGPIPE, SIG_IGN);
