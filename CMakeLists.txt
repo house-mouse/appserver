@@ -22,7 +22,7 @@ add_subdirectory(libs/openssl)
 #add_subdirectory(libs/libressl)
 add_subdirectory(libs/wslay)
 add_subdirectory(libs/h2o)
-add_subdirectory(libs/curl)
+#add_subdirectory(libs/curl)
 
 FetchContent_MakeAvailable(openssl-external wslay-external h2o-external)
 
