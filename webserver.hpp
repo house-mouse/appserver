@@ -32,7 +32,6 @@ struct WebSocketRegistrationRecord {
     h2o_pathconf_t          *path_conf;
 };
 
-
 // Webserver instance
 
 class H2O_Webserver {
@@ -50,9 +49,11 @@ private:
     static h2o_multithread_receiver_t libmemcached_receiver;
 
     std::vector<std::shared_ptr<WebSocketRegistrationRecord> > websocket_registrations;
+    
+    h2o_hostconf_t *hostconf;
+
 public:
     h2o_globalconf_t config;
-    h2o_hostconf_t *hostconf;
     h2o_context_t ctx;
 
     h2o_accept_ctx_t accept_ctx;
@@ -61,6 +62,10 @@ public:
                                   int flags=0);
     h2o_pathconf_t *register_handler(const char *path,
                                      int (*on_req)(h2o_handler_t *, h2o_req_t *));
+    h2o_pathconf_t *register_static_file_handler(const char *path,
+                                                 const char *mime_type,
+                                                 const char *data,
+                                                 size_t len);
     h2o_pathconf_t *register_static_file_handler(const char *path,
                                                  const char *mime_type,
                                                  const unsigned char *data,

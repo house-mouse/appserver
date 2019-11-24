@@ -42,6 +42,10 @@ add_library(libappserver
     cputime.cpp
     webserver.cpp
     webserver.hpp
+    webserver_handler.hpp
+    webserver_handler.cpp
+    webserver_staticfile_handler.hpp
+    webserver_staticfile_handler.cpp
     appserver_websocket.cpp
     appserver_websocket.hpp
     uvmutex.hpp

@@ -173,6 +173,17 @@ h2o_pathconf_t *H2O_Webserver::register_static_file_handler(const char *path,
     return pathconf;
 }
 
+// char vs. unsigned char is really unfortunate...
+inline h2o_pathconf_t *H2O_Webserver::register_static_file_handler(const char *path,
+                                                            const char *content_type,
+                                                            const char *data,
+                                                            size_t len) {
+    
+    return register_static_file_handler(path,
+                                        content_type,
+                                        (const unsigned char *)data,
+                                        len);
+}
 
 
 h2o_pathconf_t *H2O_Webserver::register_websocket(const char *path) {
