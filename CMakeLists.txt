@@ -28,7 +28,7 @@ FetchContent_MakeAvailable(openssl-external wslay-external h2o-external)
 
 set (LIB_UV_INCLUDE_DIRS ${LIBUV_INCLUDE_DIRECTORIES})
 set (LIB_OPENSSL_INCLUDE_DIRS ${OPENSSL_INCLUDE_DIRECTORIES})
-add_subdirectory(submodules/uv-ssl-client)
+#add_subdirectory(submodules/uv-ssl-client)
 
 
 add_library(libappserver
